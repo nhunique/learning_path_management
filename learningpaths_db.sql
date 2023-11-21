@@ -40,7 +40,7 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `createdDate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `profilePhotoPath` varchar(255) DEFAULT NULL,
-  `bio` text NOT NULL
+  `bio` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
