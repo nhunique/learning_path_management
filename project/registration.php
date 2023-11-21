@@ -1,5 +1,5 @@
 <?php
-require_once('config.php');
+require_once('dbconfig.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +20,7 @@ require_once('config.php');
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         
 
-        $sql = "INSERT INTO users (first_name, last_name, email, password_hash)
+        $sql = "INSERT INTO users (firstName, lastName, email, password_hash)
             VALUES(?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
         $result = $stmt->execute([$firstname, $lastname, $email, $password_hash]);
