@@ -58,7 +58,6 @@ CREATE TABLE `learning_paths` (
   `pathID` int(50) UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `title` varchar(255) UNIQUE KEY NOT NULL,
   `description` text NOT NULL,
-  `url` varchar(255) NOT NULL,
   `createdDate` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `userID` int(50) UNSIGNED NOT NULL,
   `votes` int(50) NOT NULL DEFAULT 0,
@@ -82,10 +81,25 @@ CREATE TABLE `learning_paths` (
 DROP TABLE IF EXISTS `user_vote`;
 CREATE TABLE `user_vote` (
   `id` int(50) UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  `userID` int(50) UNSIGNED NOT NULL,
   `pathID` int(50) UNSIGNED NOT NULL,
+  `userID` int(50) UNSIGNED NOT NULL,
   UNIQUE KEY `unique_vote` (userID, pathID),
   FOREIGN KEY (userID) REFERENCES users(userID),
+  FOREIGN KEY (pathID) REFERENCES learning_paths(pathID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+
+--
+-- Table structure for table `urls`
+--
+-- Creation: Nov 21, 2023 at 04:10 PM
+--
+DROP TABLE IF EXISTS `urls`;
+CREATE TABLE `urls` (
+  `urlID` int(50) UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `urlTitle` varchar(255) UNIQUE KEY NOT NULL,
+  `pathID` int(50) UNSIGNED NOT NULL,
   FOREIGN KEY (pathID) REFERENCES learning_paths(pathID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
