@@ -99,6 +99,7 @@ DROP TABLE IF EXISTS `urls`;
 CREATE TABLE `urls` (
   `urlID` int(50) UNSIGNED PRIMARY KEY NOT NULL AUTO_INCREMENT,
   `urlTitle` varchar(255) UNIQUE KEY NOT NULL,
+  `urlLink` varchar(255) NOT NULL,
   `pathID` int(50) UNSIGNED NOT NULL,
   FOREIGN KEY (pathID) REFERENCES learning_paths(pathID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
