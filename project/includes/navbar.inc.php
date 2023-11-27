@@ -26,8 +26,14 @@
                 <li class="nav-item">
                     <a href="register.php" class="nav-link">Register</a>
                 </li>
-                <li class="nav-item container-fluid">        
-                    <a href="pathsManager.php" class="nav-link" >Learning Path Management</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Learning Path Management
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="view.php">View/Update/Delete</a></li>
+                        <li><a class="dropdown-item" href="pathsManager.php">Create</a></li>
+                    </ul>
                 </li>
 
                 <!-- search box -->
