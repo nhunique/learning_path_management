@@ -49,8 +49,8 @@ class LoginContr extends Login{
         
 
         //get user
-        $this->getUser($this->email, $this->password);
-
+        $users = $this->getUser($this->email, $this->password);
+        return $users;
     }
 
     //Check error code

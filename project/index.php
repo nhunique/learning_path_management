@@ -12,11 +12,16 @@
     <title>Home</title>
 </head>
 <body>
-    <?php include_once 'includes/navbar.inc.php'?>
+    <?php include 'includes/navbar.inc.php'?>
 
         <?php
+        if($_SESSION['email']){
             $view = new UserView($_SESSION['userid']);
             $view->helloName($_SESSION['userid']);
+        } else {
+            echo "You need to login.";
+            header("Location: login.php");
+        }
         ?>
     
     //Display Something

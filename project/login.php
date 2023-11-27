@@ -9,10 +9,10 @@
 <body>
     <?php include 'includes/class-autoload.inc.php'?>
     <?php include 'includes/navbar.inc.php'?>
-    <?php include 'includes/login.inc.php'?>
+
+    <?php include 'includes/login.inc.php' ?>
 
    
-
     <!-- login form -->
     <div class="container-fluid vertical-center">
         <form action="login.php" method="post">
@@ -36,6 +36,38 @@
             </div>
         </form>
     </div>
+
+    <?php
+    // Check if the "error" parameter is present in the URL
+    if($_SERVER['REQUEST_METHOD'] === 'GET'){
+        if (isset($_GET['error'])) {
+            $errorCode = $_GET['error'];
+
+            // Display something based on the error code
+            switch ($errorCode) {
+                case 'none':
+                    echo '<script type="text/javascript">alert("Register successfully.");</script>';
+                    //going back to login page
+                    break;
+                case 'invalidemail':
+                    echo '<script type="text/javascript">alert("Invalid email error!");</script>';
+                    break;
+                case 'emptyinput':
+                    echo '<script type="text/javascript">alert("Empty Inputs error!");</script>';
+                    break;
+                case 'wrongpassword':
+                    echo '<script type="text/javascript">alert("Wrong password error!");</script>';
+                    break;
+                case 'usernotfound':
+                    echo '<script type="text/javascript">alert("User not found error!");</script>';
+                    break;
+                default:
+                echo 'Unknown error!';
+                break;
+            }
+        }
+    }
+    ?>
 
 
 

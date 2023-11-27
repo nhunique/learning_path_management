@@ -72,42 +72,39 @@ class RegisterContr extends Register{
 
         // Check if the "error" parameter is present in the URL
         if (isset($_GET['error'])) {
-            $errorCode = $_GET['error'];
-            if ($_GET['register']) {
-                $registerCode = $_GET['register'] ;
-                // Display something based on the error code
-                switch ($errorCode) {
-                    case 'none':
-                        if ($_GET['register'] == "successs") {
-                            //going to login page
-                            header("Location: ../project/login.php");
-                        }
+            $errorCode = $_GET['error'];          
+            switch ($errorCode) {
+                case 'none':
+                    if ($_GET['register'] ) {
+                        //going to login page
+                        header("Location: ../project/login.php");
+                    } else {
                         //going back to front page
                         header("Location: ../project/index.php?error=none");
-                        break;
-                    case 'invalidemail':
-                        echo "Invalid email error!";
-                        header("Location: ../project/register.php?error=invalidemail");
-                        break;
-                    case 'usertaken':
-                        echo "User taken error!";
-                        header("Location: ../project/register.php?error=usertaken");
-                        break;
-                    case 'emptyinput':
-                        echo "Empty input error!";
-                        header("Location: ../project/register.php?error=emptyinput");
-                        break;
-                    case 'wrongpassword':
-                        echo "Wrong Password error!";
-                        header("Location: ../project/register.php?error=wrongpassword");
-                        break;
-                    default:
-                        echo "Unknown error!";
-                        break;
-                }
+                    }
+                    break;
+                case 'invalidemail':
+                    echo "Invalid email error!";
+                    header("Location: ../project/register.php?error=invalidemail");
+                    break;
+                case 'usertaken':
+                    echo "User taken error!";
+                    header("Location: ../project/register.php?error=usertaken");
+                    break;
+                case 'emptyinput':
+                    echo "Empty input error!";
+                    header("Location: ../project/register.php?error=emptyinput");
+                    break;
+                case 'wrongpassword':
+                    echo "Wrong Password error!";
+                    header("Location: ../project/register.php?error=wrongpassword");
+                    break;
+                default:
+                    echo "Unknown error!";
+                    break;
             }
         }
     }
-
-
 }
+
+

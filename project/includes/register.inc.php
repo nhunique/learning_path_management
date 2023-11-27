@@ -23,5 +23,4 @@ if(isset($_POST['create'])){
   
     //going back to login page
     header("Location: ../project/login.php?error=none&register=success");
-    $register->checkErrorCode($_GET['error'], $_GET['register']);
 }
