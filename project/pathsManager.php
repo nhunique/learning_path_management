@@ -121,8 +121,7 @@
             // Display something based on the error code
             switch ($errorCode) {
                 case 'none':
-                    
-                    echo '<p class="text-success"> Create successfully!';
+                    echo '<script type="text/javascript">alert("Create/Update successfully.");</script>';
                     break;
                 case 'invaliduser':
                     echo "Invalid email error!";

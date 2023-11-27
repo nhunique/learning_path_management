@@ -1,18 +1,29 @@
 <?php
-    session_start(); 
-    isset($_SESSION['email']) ? $_SESSION['email'] : " ";
+session_start(); 
 
-    include 'includes/class-autoload.inc.php';
-    include 'includes/navbar.inc.php';
-    include 'includes/pathsManager.inc.php';
+$_SESSION['email'] = isset($_SESSION['email']) ? $_SESSION['email'] : "";
 
-    if($_SERVER['REQUEST_METHOD'] === 'POST'){
-        $pathID       = $_POST['pathID'];
+include 'includes/class-autoload.inc.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['update'])) {  
+
+        $pathID = isset($_POST['pathID']) ? (int)$_POST['pathID'] :"" ;
         $email = $_SESSION['email'];
-        $learningPath = new LearningPath();
-        $learningPath->updateSpecificLearningPath($pathID, $email);
+        $updateTitle =isset($_POST['updateTitle']) ? $_POST['updateTitle'] :" " ;
+        $updateDescription = isset($_POST['updateDescription']) ? $_POST['updateDescription'] :" " ;
+        $updateUrlTitles = isset($_POST['updateUrlTitles']) ? $_POST['updateUrlTitles'] :" " ;
+        $updateUrlLinks = isset($_POST['updateUrlLinks'] )? $_POST['updateUrlLinks'] :" " ;
 
-        header("Location: pathsManager.php?error=none");
+
+        print_r($_POST);
+
+        $learningPath = new LearningPath();   
+        $path = $learningPath->updateSpecificLearningPath($pathID, $email, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks);
+
+        print_r($path);
+        //header("Location: pathsManager.php?error=none");
+       // exit(); 
     }
-
+}
 ?>
