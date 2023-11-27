@@ -105,7 +105,9 @@ class LearningPathContr extends LearningPath{
 
             // Display associated URLs
             $urls = $learningPath->getUrls($pathID); // fetch URLs for a specific pathID
-
+            echo '<pre>';
+            var_dump($urls);
+            
             echo '<ul class="list-group list-group-flush">';
             foreach ($urls as $url) {
                 echo '<li class="list-group-item"><a href="' . htmlspecialchars($url['urlLink']) . '">' . htmlspecialchars($url['urlTitle']) . '</a></li>';

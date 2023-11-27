@@ -20,25 +20,25 @@
         // Display something based on the error code
         switch ($errorCode) {
             case 'none':
-                echo "Registered successfully!";
+                echo '<script type="text/javascript">alert("Register successfully.");</script>';
                 //going back to login page
                 header("Location: ../project/login.php?error=none&signup=success");
                 break;
             case 'invalidemail':
-                echo "Invalid email error!";
+                echo '<script type="text/javascript">alert("Invalid email error!");</script>';
                 break;
             case 'usertaken':
-                echo "User taken error!";
+                echo '<script type="text/javascript">alert("User taken error!");</script>';
                 break;
             case 'emptyinput':
-                echo "Empty input error!";
+                echo '<script type="text/javascript">alert("IEmpty Inputs error!");</script>';
                 break;
             case 'wrongpassword':
-                echo "Wrong Password error!";
+                echo '<script type="text/javascript">alert("Wrong password error!");</script>';
                 break;
             default:
-                echo "Unknown error!";
-                break;
+            echo 'unknown error.';
+            break;
         }
     }
     ?>

@@ -55,8 +55,8 @@
                         <?php
                         }   else {
                         ?>
-                        <button class="col-auto btn btn-outline-primary"><a href="#">SIGN UP</a></button>
-                        <button class="col-auto btn btn-outline-primary"><a href="#" class="header-login-a">LOG IN</a></button>
+                        <button class="col-auto btn btn-outline-primary"><a href="register.php">SIGN UP</a></button>
+                        <button class="col-auto btn btn-outline-primary"><a href="login.php" class="header-login-a">LOG IN</a></button>
                         <?php }?>
                     </div>
                 </li>

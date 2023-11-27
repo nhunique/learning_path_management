@@ -49,38 +49,45 @@
                     
                     <div class="form-group">
                         <label for="title">Title:</label>
-                        <input type="text" class="form-control" id="title" name="title" value="<?= $pathTitle?>">
+                        <input type="text" class="form-control" id="title" name="updateTitle" value="<?= $pathTitle?>">
                     </div>
                     <div class="form-group">
                         <label for="description">Description:</label>
-                        <input class="form-control" id="description" name="description" rows="5" cols="100" value="<?= $pathDescription ?>">
+                        <input class="form-control" id="description" name="updateDescription" rows="5" cols="100" value="<?= $pathDescription ?>">
                     </div>
+                   
+
                     <div class="form-group">
                         <label for="url">URL:</label>
                         <div id="urlFields">
-                            <div class="input-group mb-2">
-                            <input type="text" class="form-control" name="urlTitles[]" 
-                            value="<?php foreach ($urls as $num => $url) {
+                            <?php 
+                            echo '<ul class="list-group list-group-flush">';
+                            foreach ($urls as $num => $url) {
                                 $urlTitle = $urls[$num]['urlTitle'];
-                                echo $urlTitle;
-                            }?>">
-                            <input type="url" class="form-control" name="urlLinks[]" 
-                            value="<?php foreach ($urls as $num => $url) {
                                 $urlLink = $urls[$num]['urlLink'];
-                                echo $urlLink;
-                            }?>">>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
-                            </div>
-                            </div>
+                                echo '<li class="list-group-item">';
+                                echo '<div class="input-group mb-2">';
+                                echo '<input type="text" class="form-control" name="updateUrlTitles[]" value="' . htmlspecialchars($urlTitle) . '">';
+                                echo '<input type="url" class="form-control" name="updateUrlLinks[]" value="' . htmlspecialchars($urlLink) . '">';
+                                echo '<div class="input-group-append">';
+                                echo '<button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>';
+                                echo '</div>';
+                                echo '</div>';
+                                echo '</li>';
+                            }
+                            echo '</ul>';
+                            ?>
                         </div>
-                        <input type="hidden" name="pathID" value="<?=$pathID?>">;
+                    </div>
+
+                    </div>
+                        <input type="hidden" name="pathID" value="<?=$pathID?>">
 
                         <button class="btn btn-outline-secondary" type="button" onclick="addUrlField()">Add URL</button>
                     </div>
-
+                    <div>
                     <button type="submit" class="btn btn-primary mt-3" name="update" value="update">Update</button>
-                    
+                    </div>
                 <fieldset>
             </form>
         </div>
@@ -98,8 +105,8 @@
         const newUrlField = document.createElement('div');
         newUrlField.className = 'input-group mb-2';
         newUrlField.innerHTML = `
-        <input type="text" class="form-control" name="urlTitles[]" placeholder="Enter URL Title" required>
-        <input type="url" class="form-control" name="urlLinks[]" placeholder="Enter URL" required>
+        <input type="text" class="form-control" name="updateUrlTitles[]" placeholder="Enter URL Title" required>
+        <input type="url" class="form-control" name="updateUrlLinks[]" placeholder="Enter URL" required>
         <div class="input-group-append">
             <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
         </div>

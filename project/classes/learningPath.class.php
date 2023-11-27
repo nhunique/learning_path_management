@@ -100,9 +100,8 @@ class LearningPath extends Dbh{
     public function getSpecificPath($pathID){
         // grab path and associated urls info from the database
     
-        $sql = "SELECT DISTINCT title, description, userID, learning_paths.pathID  FROM learning_paths 
-                JOIN urls ON learning_paths.pathID = urls.pathID
-                WHERE learning_paths.pathID=?";
+        $sql = "SELECT DISTINCT title, description, userID, pathID  FROM learning_paths 
+                WHERE pathID=?";
         $stmt = $this->connect()->prepare($sql);
     
     
@@ -115,8 +114,8 @@ class LearningPath extends Dbh{
         }
     
         // Fetch all rows
-        $rows = $stmt->fetchAll();
-        return $rows;
+        $row = $stmt->fetchAll();
+        return $row;
     }
 
     
@@ -131,8 +130,7 @@ class LearningPath extends Dbh{
          }
 
         // grab path and associated urls info from the database
-        $sql = "SELECT title, description, userID, learning_paths.pathID , GROUP_CONCAT(urlLink) AS urlLinks FROM learning_paths 
-                JOIN urls ON learning_paths.pathID = urls.pathID
+        $sql = "SELECT title, description, userID, pathID  FROM learning_paths 
                 WHERE userID=?";
         $stmt = $this->connect()->prepare($sql);
     
@@ -178,7 +176,7 @@ class LearningPath extends Dbh{
 
     
     //UPDATE LEARNING PATH
-    public function updateSpecificLearningPath($pathID, $email) {
+    public function updateSpecificLearningPath($pathID, $email, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks) {
         // Check if the userID exists in the users table
         $userIDExists = $this->checkUserExists($email);
     
@@ -187,41 +185,123 @@ class LearningPath extends Dbh{
             exit();
         }
     
-        $paths = $this->getLearningPath($email); //returns rows
-        foreach ($paths as $path) {
-            $pathID = $path['pathID'];
-            $pathTitle = $path['title'];
-            $pathDescription= $path['description'];
-        }
-    
+        $connection= $this->connect();
+
+        // Update learning_paths (parent) first
         $sql = "UPDATE learning_paths SET title=?, description=?, userID=? WHERE pathID=?";
-        $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$pathTitle, $pathDescription, $userIDExists, $pathID]);
-    
-        // Update urls
+        $stmt = $connection->prepare($sql);
 
-        
-        $sqlUrls = "UPDATE urls SET urlTitle=?, urlLink=? WHERE pathID=?";
-        $stmtUrls = $this->connect()->prepare($sqlUrls);
-    
-        $urls = $this->getUrls($pathID); //returns rows
-        foreach ($urls as $url) {
-            $urlID = $url['urlID'];
-            $urlTitle = $url['urlTitle'];
-            $urlLink= $url['urlLink'];
-            $stmtUrls->execute([$urlTitle, $urlLink, $pathID]);
-        }
-
-        // Check for errors
-        if (!$stmt || !$stmtUrls) {
-            $stmt = null;
-            $stmtUrls = null;
+        // Check for prepare error
+        if (!$stmt) {
             header("Location: ../project/pathsManager.php?error=stmtfailed");
             exit();
         }
-    
+
+        // Execute the update
+        $result = $stmt->execute([$updateTitle, $updateDescription, $userIDExists, $pathID]);
+
+        // Check for execute error
+        if (!$result) {
+            
+            header("Location: ../project/pathsManager.php?error=updatefailed");
+            exit();
+        }
+
+       
+
+        // Update existing urls 
+        $sqlUrls = "UPDATE urls SET urlTitle=?, urlLink=? WHERE urlID=?";
+        $stmtUrls = $connection->prepare($sqlUrls);
+
+        // Check for prepare error
+        if (!$stmtUrls) {
+            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            exit();
+        }
+
+        $selectSql = "SELECT * FROM urls WHERE pathID = ?";
+        $stmtSelect = $connection->prepare($selectSql);
+        // Check for prepare error
+        if (!$stmtSelect) {
+            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            exit();
+        }
+        $stmtSelect->execute([$pathID]);
+        $urls = $stmtSelect->fetchAll();
+
+        
+        $numOfUpdate = count($updateUrlTitles);
+        $numOfOrigin = count($urls);
+        $count = 0;
+
+        if ($count < $numOfOrigin && $count <$numOfUpdate){
+            foreach ($urls as $i =>  $url) {
+                //update existing urls
+                $urlID = $url['urlID'];
+                $updateUrlTitle = $updateUrlTitles[$i];
+                $updateUrlLink = $updateUrlLinks[$i];
+        
+                // Execute the update
+                $resultUrls = $stmtUrls->execute([$updateUrlTitle, $updateUrlLink, $urlID]);
+        
+                // Check for execute error
+                if (!$resultUrls) {
+                    echo $stmtUrls->errorInfo(); // or log the error
+                    header("Location: ../project/pathsManager.php?error=urlupdatefailed");
+                    exit();
+                }
+                $count++;
+            }
+         
+
+        }  elseif ($count >= $numOfOrigin && $count <= $numOfUpdate)  {
+            for( $j = $count ; $j <= $numOfUpdate; $j++){
+
+                // This URL is beyond the existing ones, so add it as a new URL
+                $newUrlTitle = $updateUrlTitles[$j];
+                $newUrlLink = $updateUrlLinks[$j];
+        
+                // Insert the new URL into the database
+                $insertSql = "INSERT INTO urls (pathID, urlTitle, urlLink) VALUES (?, ?, ?)";
+                $stmtInsert = $this->connect()->prepare($insertSql);
+        
+                if (!$stmtInsert) {
+                    header("Location: ../project/pathsManager.php?error=urlinsertfailed");
+                    exit();
+                }
+        
+                // Execute the insert
+                $resultInsert = $stmtInsert->execute([$pathID, $newUrlTitle, $newUrlLink]);
+        
+                // Check for execute error
+                if (!$resultInsert) {
+                    header("Location: ../project/pathsManager.php?error=urlinsertfailed");
+                    exit();
+                }
+               
+            }
+        }
+
+        //debug
+        $testsql = "SELECT * from learning_paths JOIN urls ON learning_paths.pathID = urls.pathID WHERE learning_paths.pathID =?";
+        $stmtTest = $connection->prepare($testsql);
+        $stmtTest->execute([$pathID]);
+        $test = $stmtTest->fetchAll();
+        
+        $stmtTest =null;
+        // Close the statements
+        $stmtInsert = null;        
+        $stmtSelect = null;
         $stmt = null;
         $stmtUrls = null;
+
+
+        print 'count:'. $count. '<br>'; print 'orgin:'.$numOfOrigin.'<br>'; print'update:'. $numOfUpdate . '<br>';
+         //Redirect if everything was successful
+        //header("Location: pathsManager.php?error=none");
+       // header("Location: view.php");
+        //exit();
+        return $test;
     }
     
 
