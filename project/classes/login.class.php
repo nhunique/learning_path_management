@@ -61,7 +61,7 @@ class Login extends Dbh{
             //log in the user and start user session
             $users = $stmt->fetchALL();
             session_start();
-            $_SESSION['userid'] = $users[0]['email'];
+            $_SESSION['email'] = $users[0]['email'];
             
             //clear stmt
             $stmt=null;

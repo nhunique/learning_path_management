@@ -15,4 +15,6 @@ class UserView extends Login{
         $result = $this->getUserName($sessionid);
         echo "<p class='display-5 p-2'> Hello, " . $result .'!</p>';
     }
+
+
 }

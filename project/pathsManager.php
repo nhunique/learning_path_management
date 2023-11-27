@@ -1,4 +1,13 @@
-<?php session_start(); ?>
+<?php 
+    session_start(); 
+    isset($_SESSION['email']) ? $_SESSION['email'] : " ";
+
+    $error = isset($_GET['error']) ? $_GET['error'] :null;
+    checkErrorCode($error);
+
+    
+    
+    ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,123 +20,125 @@
 <body>
     <?php include 'includes/class-autoload.inc.php'?>
     <?php include 'includes/navbar.inc.php'?>
-    <?php include 'includes/pathManager.inc.php'?>
+    <?php include 'includes/pathsManager.inc.php'?>
 
     <!-- Path Manager System  -->
     <div class="container mt-5 mb-5">
-        <h1>Path Manager System </h1>
+        <h1 class="display-2">Path Manager System </h1>
     </div>
 
-    <!-- -->
+    <!-- Create Path Form-->
     <section id="pathManager" class="container">
-        <div class="accordion accordion-flush" id="pathManager">
-            <div class="accordion-item" id="creare">
-                <h2 class="accordion-header" id="flush-headingCreate">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseCreate" aria-expanded="false" aria-controls="flush-collapseCreate">
-                    Create
-                </button>
-                </h2>
-                <div id="flush-collapseCreate" class="accordion-collapse collapse" aria-labelledby="flush-headingCreate" data-bs-parent="#pathManager">
-                <div class="accordion-body">
-                    <form id="createForm" method="post" action="pathsManager.php">
-                        <fieldset>
-                            <legend>Create A New Path</legend>
-                            <input type="hidden" name="userID" value="<?php $_SESSION['userid']?>">
-                            <div class="form-group">
-                                <label for="title">Title:</label>
-                                <input type="text" class="form-control" id="title" placeholder="Enter your title" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="description">Description:</label>
-                                <textarea class="form-control" id="description" name="description" rows="5" cols="100" placeholder="Enter your description"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="url">URL:</label>
-                                <div id="urlFields">
-                                    <div class="input-group mb-2">
-                                    <input type="text" class="form-control" name="urlTitles[]" placeholder="Enter URL Title" required>
-                                    <input type="url" class="form-control" name="urls[]" placeholder="Enter URL" required>
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
-                                    </div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-outline-secondary" type="button" onclick="addUrlField()">Add URL</button>
-                                </div>
-
-
-                            <button type="submit" class="btn btn-primary mt-3" name="create" value="create">Create</button>
-                        <fieldset>
-                    </form>
-                </div>
-            </div>
-            <div class="accordion-item" id="update">
-                <h2 class="accordion-header" id="flush-headingUpdate">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseUpdate" aria-expanded="false" aria-controls="flush-collapseUpdate">
-                    Update
-                </button>
-                </h2>
-                <div id="flush-collapseUpdate" class="accordion-collapse collapse" aria-labelledby="flush-headingUpdate" data-bs-parent="#pathManager">
-                <div class="accordion-body">
+        <div class="container" id="create">
+            <form id="CreateForm" method="post" action="pathsManager.php">
+                <fieldset>
+                <legend class="text-primary display-4">Create New Learning Path</legend>
                     
-            
-                </div>
-            </div>
-            <div class="accordion-item" id="view">
-                <h2 class="accordion-header" id="flush-headingView">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseView" aria-expanded="false" aria-controls="flush-collapseView">
-                    View
-                </button>
-                </h2>
-                <div id="flush-collapseView" class="accordion-collapse collapse" aria-labelledby="flush-headingView" data-bs-parent="#pathManager">
-                <div class="accordion-body">
-
-
-
-                </div>
-            </div>
-            <div class="accordion-item" id="delete">
-                <h2 class="accordion-header" id="flush-headingDelete">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDelete" aria-expanded="false" aria-controls="flush-collapseDelete">
-                    Delete
-                </button>
-                </h2>
-                <div id="flush-collapseDelete" class="accordion-collapse collapse" aria-labelledby="flush-headingDelete" data-bs-parent="#pathManager">
-                <div class="accordion-body">
-
-
-                </div>
-            </div>
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter your title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" cols="100" placeholder="Enter your description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">URL:</label>
+                        <div id="urlFields">
+                            <div class="input-group mb-2">
+                            <input type="text" class="form-control" name="urlTitles[]" placeholder="Enter URL Title" required>
+                            <input type="url" class="form-control" name="urlLinks[]" placeholder="Enter URL" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
+                            </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-secondary" type="button" onclick="addUrlField()">Add URL</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3" name="create" value="create">Create</button> 
+                <fieldset>
+            </form>         
+        </div>
     </section>
-
-
+    
 
     
 
-    <!-- -->
 
-    
     
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script>
-    function addUrlField() {
-        const urlFields = document.getElementById('urlFields');
-        const newUrlField = document.createElement('div');
-        newUrlField.className = 'input-group mb-2';
-        newUrlField.innerHTML = `
-        <input type="text" class="form-control" name="urlTitles[]" placeholder="Enter URL Title" required>
-        <input type="url" class="form-control" name="urls[]" placeholder="Enter URL" required>
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
-        </div>
-        `;
-        urlFields.appendChild(newUrlField);
-    }
+        function addUrlField() {
+            const urlFields = document.getElementById('urlFields');
+            const newUrlField = document.createElement('div');
+            newUrlField.className = 'input-group mb-2';
+            newUrlField.innerHTML = `
+            <input type="text" class="form-control" name="urlTitles[]" placeholder="Enter URL Title" required>
+            <input type="url" class="form-control" name="urlLinks[]" placeholder="Enter URL" required>
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="removeUrlField(this)">Remove</button>
+            </div>
+            `;
+            urlFields.appendChild(newUrlField);
+        }
 
-    function removeUrlField(button) {
-        const urlField = button.closest('.input-group');
-        urlField.remove();
-    }
+        function removeUrlField(button) {
+            const urlField = button.closest('.input-group');
+            urlField.remove();
+        }
+
+        // JavaScript to handle switching between View and Edit modes
+        document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector("form[action='pathsManager.php'] button[name='view']").addEventListener("click", function (event) {
+            // Add the "updateMode" field to the form
+            var form = document.querySelector("form[action='pathsManager.php']");
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "updateMode";
+            input.value = "true";
+            form.appendChild(input);
+
+            // Submit the form
+            form.submit();
+            });
+        });
+
+
     </script>
 </html>
+
+
+<?php
+
+    //Check error code
+    function checkErrorCode($errorCode){
+
+        // Check if the "error" parameter is present in the URL
+        if (isset($_GET['error'])) {
+            $errorCode = $_GET['error'];
+
+            // Display something based on the error code
+            switch ($errorCode) {
+                case 'none':
+                    
+                    echo '<p class="text-success"> Create successfully!';
+                    break;
+                case 'invaliduser':
+                    echo "Invalid email error!";
+                   
+                    break;
+                case 'emptyinput':
+                    echo "Empty input error!";
+              
+                    break;
+                
+                default:
+                    echo "Unknown error!";
+                    break;
+            }
+        }
+
+    }
+?>
+
