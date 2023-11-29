@@ -16,8 +16,8 @@
 
         <?php
         if($_SESSION['email']){
-            $view = new UserView($_SESSION['userid']);
-            $view->helloName($_SESSION['userid']);
+            $view = new UserView($_SESSION['email']);
+            $view->helloName($_SESSION['email']);
         } else {
             echo "You need to login.";
             header("Location: login.php");

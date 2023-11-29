@@ -7,15 +7,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $email         = $_POST['email'];
         $password      = $_POST['password'];
 
-        //instanciate loginContr class
+       
+        //instanciate userContr class
         $login =  new LoginContr($email, $password);
         
+
+        //$login->checkErrorCode($_GET['error'], $_GET['register']);
+
         //Running error handler and user login
         $login->loginUser($email, $password);
-
-
+        echo 
         //going back to front page
-        header("Location: ../project/index.php?error=none");
+        header("Location: index.php?error=none");
     
 
     }

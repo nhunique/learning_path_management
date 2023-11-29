@@ -61,6 +61,9 @@
         </div>
     </section>
     
+    <hr>
+
+    <div class="container mt-3 ml-3"><a class="btn btn-primary mt-3"  href="view.php">View Your Learning Paths</a></div>
 
     
 

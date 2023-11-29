@@ -62,12 +62,12 @@ class LearningPathContr extends LearningPath{
     
         // HTML content for each card
         echo '<div class="card p-5">';
-        echo '<h3 class="card-header">Old Title: ' . htmlspecialchars($title) . '</h3>'; 
+        echo '<h3 class="card-header">Title: ' . htmlspecialchars($title) . '</h3>'; 
        
         echo '<div class="card-body">' ;
-        echo '<h4 class="card-title">Old Description: ' . htmlspecialchars($description).'</h4>';
+        echo '<h4 class="card-title">Description: ' . htmlspecialchars($description).'</h4>';
        
-        echo '<p class="card-text">Old Links: </p>';
+        echo '<p class="card-text">Links: </p>';
         echo  '</div>';
 
         // Display associated URLs
@@ -88,8 +88,8 @@ class LearningPathContr extends LearningPath{
         
         $learningPath = new LearningPath();
         $rows = $learningPath->getLearningPath($email);
-        echo '<pre>';
-        var_dump($rows);
+        //echo '<pre>';
+        //var_dump($rows);
         foreach ($rows as $path) {
             $title = $path['title'];
             $description = $path['description'];
@@ -105,8 +105,8 @@ class LearningPathContr extends LearningPath{
 
             // Display associated URLs
             $urls = $learningPath->getUrls($pathID); // fetch URLs for a specific pathID
-            echo '<pre>';
-            var_dump($urls);
+            //echo '<pre>';
+            //var_dump($urls);
             
             echo '<ul class="list-group list-group-flush">';
             foreach ($urls as $url) {

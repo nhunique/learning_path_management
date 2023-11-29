@@ -21,11 +21,12 @@
     
    <section class="container">
         <div class="container" id="view">
-        <h1 class="container-heading">View</h1>
+        <h1 class="container-heading">View Your Learning Paths</h1>
         <?php     
                 
             $email       = $_SESSION['email'];
             LearningPathContr::viewLearningPath($email); 
+
         ?>
         </div>
     </section>

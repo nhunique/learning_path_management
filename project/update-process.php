@@ -16,14 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateUrlLinks = isset($_POST['updateUrlLinks'] )? $_POST['updateUrlLinks'] :" " ;
 
 
-        print_r($_POST);
+        //print_r($_POST);
 
         $learningPath = new LearningPath();   
         $path = $learningPath->updateSpecificLearningPath($pathID, $email, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks);
 
-        print_r($path);
-        //header("Location: pathsManager.php?error=none");
-       // exit(); 
+       // print_r($path);
+        header("Location: pathsManager.php?error=none");
+        exit(); 
     }
 }
 ?>

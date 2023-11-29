@@ -9,7 +9,6 @@
 <body>
     <?php include 'includes/class-autoload.inc.php'?>
     <?php include 'includes/navbar.inc.php'?>
-
     <?php include 'includes/login.inc.php' ?>
 
    
@@ -46,7 +45,7 @@
             // Display something based on the error code
             switch ($errorCode) {
                 case 'none':
-                    echo '<script type="text/javascript">alert("Register successfully.");</script>';
+                    echo '<script type="text/javascript">alert("Loged in successfully.");</script>';
                     //going back to login page
                     break;
                 case 'invalidemail':
