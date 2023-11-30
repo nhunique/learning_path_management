@@ -2,31 +2,33 @@
 
 class LearningPath extends Dbh{
 
-    protected function checkLearningPathExists($pathID){
-
-        $sql = "SELECT pathID FROM learning_paths WHERE pathID=? ";
+  
+    // Function to check if a user with a vote for a path exists
+    private function  checkUserExistsInUserVote($userID) {
+        $sql = "SELECT userID FROM user_vote 
+                WHERE userID = ?";
         $stmt = $this->connect()->prepare($sql);
-        $stmt->execute([$pathID]);
-        //Check if stmt execute
-        if(!$stmt->execute([$pathID])){
-            //close stmt
+
+        // Check if stmt execute
+        if (!$stmt->execute([$userID])) {
+            // Close stmt
             $stmt = null;
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: ../pathsManager.php?error=stmtfailed");
             exit();
         }
 
-        //check if user not exits in database
-        $result = false;
-        if($stmt->rowCount() > 0){
-            $result = true;
-        }
-        else {
-            $result = false;
+        $userID = $stmt->fetchAll();
+
+        // Check if a user was found
+        if (!$userID) {
+            return -1; // No user found
         }
 
-        return $result;
+        return $userID['userID'];
     }
 
+
+   
    // Function to check if a user with the given email exists
     private function checkUserExists($email) {
         $sql = "SELECT DISTINCT userID FROM users WHERE email = ?";
@@ -44,7 +46,7 @@ class LearningPath extends Dbh{
 
         // Check if a user was found
         if (!$userID) {
-            return false; // No user found
+            return null; // No user found
         }
 
         return $userID['userID'];
@@ -375,111 +377,229 @@ class LearningPath extends Dbh{
         }
     }
 
-    public function upvoteLearningPath($pathID, $email) {
-
-         // Check if the userID exists in the users table
-         $userIDExists = $this->checkUserExists($email);
+  
     
-         if (!$userIDExists) {
-             header("Location: pathsManager.php?error=invaliduser");
-             exit();
-         }
-     
-         $connection= $this->connect();
- 
-        if (!$this->hasUserVoted($pathID, $userIDExists)) {
-         
-            // Execute the INSERT to votes table query
-            $query = "INSERT INTO votes (pathID, userID) VALUES ($pathID, $userIDExists)";
-            if (!$connection->query($query)) {
-                header("Location: ../project/pathsManager.php?error=stmtfailed");
-                exit();
-            }
 
-            // Execute the UPDATE table learning_paths query
-            $query2 = "UPDATE learning_paths SET votes = votes + 1 WHERE pathID = $pathID";
-            if (!$connection->query($query2)) {
-                header("Location: ../project/pathsManager.php?error=stmtfailed");
-                exit();
-            }
-            
-        }
-    }
-
-    public function hasUserVoted($pathID, $email) {
-
-        // Check if the userID exists in the users table
-        $userIDExists = $this->checkUserExists($email);
+    public function getVote($pathID) {
+        $connection = $this->connect();
     
-        if (!$userIDExists) {
-            header("Location: pathsManager.php?error=invaliduser");
-            exit();
-        }
-
-        $query = "SELECT * FROM votes WHERE pathID = $pathID AND userID = $userIDExists";
-        $stmt = $this->connect()->prepare($query);
-        if(!$stmt->execute()){
+        // Execute the SELECT query
+        $query = "SELECT votes FROM learning_paths WHERE pathID = :pathID";
+        $stmt = $connection->prepare($query);
+    
+        if (!$stmt->execute([':pathID' => $pathID])) {
             header("Location: ../project/pathsManager.php?error=stmtfailed");
             exit();
-        };
-        return $stmt->fetch() !== false;
+        }
+    
+        // Fetch the result
+        $result = $stmt->fetch();
+    
+        // Check if the result is not empty
+        if ($result !== false) {
+            // Return the actual value of votes
+            return $result['votes'];
+        } else {
+            //when no result is found
+            return 0; 
+        }
     }
+    
+    
+
+    //Handle Voting System
+
+    public function hasUserVoted($pathID, $userID) {
+        $query = "SELECT * FROM user_vote WHERE pathID = :pathID AND userID = :userID";
+        $stmt = $this->connect()->prepare($query);
+        $stmt->bindParam(":pathID", $pathID, PDO::PARAM_INT);
+        $stmt->bindParam(":userID", $userID, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        return $result ? true : false;
+    }
+    
+    protected function downvoteLearningPath($pathID, $userID) {
+        $this->removeVote($pathID, $userID);
+    }
+    
+    protected function upvoteLearningPath($pathID, $userID) {
+        // Check if the user has downvoted before
+        if ($this->hasDownvoted($pathID, $userID)) {
+            // If yes, remove the downvote first
+            $this->removeVote($pathID, $userID);
+        }
+    
+        // Perform upvote
+        $query = "INSERT INTO user_vote (pathID, userID) VALUES (:pathID, :userID)";
+        $stmt = $this->connect()->prepare($query);
+        $stmt->bindParam(":pathID", $pathID, PDO::PARAM_INT);
+        $stmt->bindParam(":userID", $userID, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        // Update the votes in learning_paths
+        $this->updateVotes($pathID, 1);
+    }
+    
+    protected function removeVote($pathID, $userID) {
+        $query = "DELETE FROM user_vote WHERE pathID = :pathID AND userID = :userID";
+        $stmt = $this->connect()->prepare($query);
+        $stmt->bindParam(":pathID", $pathID, PDO::PARAM_INT);
+        $stmt->bindParam(":userID", $userID, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        // Update the votes in learning_paths
+        $this->updateVotes($pathID, -1);
+    }
+    
+    protected function hasDownvoted($pathID, $userID) {
+        $query = "SELECT * FROM user_vote WHERE pathID = :pathID AND userID = :userID";
+        $stmt = $this->connect()->prepare($query);
+        $stmt->bindParam(":pathID", $pathID, PDO::PARAM_INT);
+        $stmt->bindParam(":userID", $userID, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+        return $result ? true : false;
+    }
+    
+    private function updateVotes($pathID, $increment) {
+        $query = "UPDATE learning_paths SET votes = votes + :increment WHERE pathID = :pathID";
+        $stmt = $this->connect()->prepare($query);
+        $stmt->bindParam(":pathID", $pathID, PDO::PARAM_INT);
+        $stmt->bindParam(":increment", $increment, PDO::PARAM_INT);
+        $stmt->execute();
+    }
+    
+    public function handleVote($pathID, $voteType) {
+        
+    
+        $pathID = $_POST['pathID'];
+        $userID = $_SESSION['userID'];
+    
+        // Check if the user has voted before
+        $hasVoted = $this->hasUserVoted($pathID, $userID);
+    
+        if ($voteType === 'upvote') {
+            if (!$hasVoted) {
+                // Perform upvote SQL
+                $this->upvoteLearningPath($pathID, $userID);
+                header("Location: index.php?vote=up");
+                exit();
+            } else {
+                // Alert or handle already voted case
+                header("Location: index.php?error=already_voted");
+                exit();
+            }
+        } elseif ($voteType === 'downvote') {
+            if ($hasVoted) {
+                // Perform downvote SQL
+                $this->downvoteLearningPath($pathID, $userID);
+                header("Location: index.php?vote=down");
+                exit();
+            } else {
+                // Alert or handle not voted yet case
+                header("Location: index.php?error=not_voted_yet");
+                exit();
+            }
+        }
+    }
+    
+    //Handle Cloning Path
+
+    public function clonePath(){
+
+
+
+    }
+
 
     public function displayLearningPaths(){
 
-        //qury
-        $query = "SELECT learning_paths.pathID, learning_paths.title, learning_paths.description, users.email
+        //query
+        $query = "SELECT learning_paths.pathID, learning_paths.title, learning_paths.description, learning_paths.votes, users.firstName, users.lastName
         FROM learning_paths
         JOIN users ON learning_paths.userID = users.userID";
-
+ 
         $result = $this->connect()->query($query);
-
+ 
         if ($result) {
             while ($row = $result->fetch()) {
                 $pathID = $row['pathID'];
                 $title = $row['title'];
+                $votes= $row['votes'];
                 $description = $row['description'];
-                $userEmail = $row['email'];
-
+                $userFirstName = $row['firstName'];
+                $userLastName = $row['lastName'];
+ 
+ 
                 // Display learning path information
                 echo '<div class="card p-5">';
                 echo '<h3 class="card-header">' . htmlspecialchars($title) . '</h3>';
                 echo '<div class="card-body">';
                 echo '<h4 class="card-title">' . htmlspecialchars($description) . '</h4>';
-                echo '<p class="card-text">User: ' . htmlspecialchars($userEmail) . '</p>';
+                echo '<p class="card-text">User: ' . htmlspecialchars($userFirstName). " ". htmlspecialchars($userLastName) . '</p>';
                 // Display associated URLs
                 $urls = $this->getUrls($pathID); 
-
+ 
                 echo '<ul class="list-group list-group-flush">';
                 foreach ($urls as $url) {
                     echo '<li class="list-group-item"><a href="' . htmlspecialchars($url['urlLink']) . '">' . htmlspecialchars($url['urlTitle']) . '</a></li>';
                   }
                 echo '</ul>';
                 echo '</div>';
-
+                echo '<div class="container-fluid">';
+                //Display votes system
+                
                 // Upvote and Downvote buttons
-                echo '<div class="d-flex">';
-                echo '<form action="upvote.php" method="post">';
+                echo '<div class="row">';
+                echo '<div class="col-sm-3 col-md-6 col-lg-4 d-flex">';
+
+                echo '<form action="vote-handler.php" method="post">';
                 echo '<input type="hidden" name="pathID" value="' . $pathID . '">';
                 echo '<button type="submit" class="btn btn-success mt-3" name="upvote">Upvote</button>';
                 echo '</form>';
-
-                echo '<form action="downvote.php" method="post">';
+ 
+                echo '<form action="vote-handler.php" method="post">';
                 echo '<input type="hidden" name="pathID" value="' . $pathID . '">';
                 echo '<button type="submit" class="btn btn-danger mt-3" name="downvote">Downvote</button>';
                 echo '</form>';
+                echo '</div>';
+
+                echo '<div class="col-sm-3 col-md-2 col-lg-5">';
+                echo '<button type="text" class="btn bg-secondary mt-3 text-white" value="Votes: ' . $votes . '">Votes: ' . $votes . '</button>';
+                echo '</div>';
+
+                echo '<div class="col-sm-3 col-md-4 col-lg-3 d-flex">';
+                echo '<form action="clone-handler.php" method="post">';
+                echo '<input type="hidden" name="pathID" value="' . $pathID . '">';
+                echo '<button type="submit" class="btn btn-info text-white mt-3" name="clone">CLONE</button>';
+                echo '</form>';
+               
+                echo '<form action="clone-handler.php" method="post">';
+                echo '<input type="hidden" name="pathID" value="' . $pathID . '">';
+                echo '<button type="submit" class="btn btn-light text-info mt-3" name="share">Share</button>';
+                echo '</form>';
+                echo '</div>';
 
                 echo '</div>';
-                echo '</div>'; // Close the card
+                echo '</div>';
+                echo '</div>'; 
+                
+                
+                // Close the card
             }
         } else {
         // Handle query execution error
         echo "Error: " . $this->connect()->errorInfo()[2];
     }
-
+ 
         // Close the result set
         $result= null;
-
+ 
     }
+
+
     
 }

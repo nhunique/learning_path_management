@@ -2,7 +2,6 @@
 
 class LearningPathContr extends LearningPath{
 
-    private $pathID;
     private $title;
     private $description;
     private $email;
@@ -16,6 +15,7 @@ class LearningPathContr extends LearningPath{
         $this->description=$description;
         $this->urlTitles = $urlTitles;
         $this->urlLinks = $urlLinks;
+        
     }
 
 
@@ -133,7 +133,7 @@ class LearningPathContr extends LearningPath{
     }
 
 
-    
+  
     
 
 

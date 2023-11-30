@@ -43,7 +43,7 @@ class Login extends Dbh{
             // check if email is valid
             $sql = "SELECT * FROM users WHERE email = ?";
             $stmt = $this->connect()->prepare($sql);
-        
+            
             // Check if stmt not execute
             if (!$stmt->execute([$email])) {
                 // close stmt
@@ -51,12 +51,24 @@ class Login extends Dbh{
                 header("Location: ../project/login.php?error=stmtfailed");
                 exit();
             }
+            
+            // Fetch the result once
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-            // log in the user and start user session
+            // Check if a user was found
+            if (!$user) {
+                // User not found
+                $stmt = null;
+                header("Location: ../project/login.php?error=usernotfound");
+                exit();
+            }
+        
+            // Log in the user and start user session
             session_start();
-            $_SESSION['email'] = $stmt->fetchAll()[0]['email'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['userID'] = $user['userID'];
         
-            // clear stmt
+            // Clear stmt
             $stmt = null;
         }
     }
