@@ -48,9 +48,9 @@
                  <li class="nav-item container" >
                     <div class="row align-items-center">
                         <?php 
-                        if(isset($_SESSION['userid'])){
+                        if(isset($_SESSION['email'])){
                         ?>
-                        <div class="col-auto "><a href="#"><?= $_SESSION["userid"]; ?></a></div>
+                        <div class="col-auto "><a href="#"><?= $_SESSION["email"]; ?></a></div>
                         <button class="col-auto btn btn-outline-primary"><a href="includes/logout.inc.php" class="header-login-a">LOG OUT </a></button>
                         <?php
                         }   else {

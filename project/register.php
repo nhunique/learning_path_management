@@ -9,7 +9,7 @@
 <body>
     <?php include 'includes/class-autoload.inc.php'?>
     <?php include 'includes/navbar.inc.php'?>
-    <?php require 'includes/register.inc.php'?>
+    <?php include 'includes/register.inc.php'?>
 
     <?php
 
@@ -22,7 +22,7 @@
             case 'none':
                 echo '<script type="text/javascript">alert("Register successfully.");</script>';
                 //going back to login page
-                header("Location: ../project/login.php?error=none&signup=success");
+                header("Location: login.php?error=none&signup=success");
                 break;
             case 'invalidemail':
                 echo '<script type="text/javascript">alert("Invalid email error!");</script>';

@@ -36,9 +36,10 @@
                     <legend>Delete Learning Path</legend>
                         <?php
                             $email       = $_SESSION['email'];
-                            LearningPathContr::viewSpecificPath($pathID);
+                            $learningPath = new LearningPath();
+                            $learningPath->viewSpecificPath($pathID);
                         ?>
-                        <input type="hidden" name="pathID" value="<?=$pathID?>">;
+                        <input type="hidden" name="pathID" value="<?=$pathID?>">
                         <button type="submit" class="btn btn-primary mt-3" name="delete" value="delete">Delete</button>
                     </div>
 

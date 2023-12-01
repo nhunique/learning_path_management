@@ -49,8 +49,8 @@ class LoginContr extends Login{
         
 
         //get user
-        $users = $this->getUser($this->email, $this->password);
-        return $users;
+        return $this->getUser($this->email, $this->password);
+
     }
 
     //Check error code
@@ -63,8 +63,7 @@ class LoginContr extends Login{
             // Display something based on the error code
             switch ($errorCode) {
                 case 'none':
-                    //going back to front page
-                    header("Location: ../project/index.php?error=none");
+                    echo "No error";
                     break;
                 case 'invalidemail':
                     echo "Invalid email error!";
