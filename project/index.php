@@ -19,7 +19,7 @@
         <?php
         if($_SESSION['email']){
             $view = new UserView($_SESSION['email']);?>
-            <div class="container mr-10">
+            <div class="container mr-10 mt-5">
             <?php $view->helloName($_SESSION['email']); ?>
         
             </div>
@@ -30,7 +30,7 @@
         ?>
     
     <div class="container">
-        <h2 class="container-heading ">All Learning Paths </h2>
+        <h2 class="container-heading mt-5 mb-5">Explore Learning Paths </h2>
         <?php
         $allPaths= new LearningPath();
         $allPaths->displayLearningPaths();
@@ -63,8 +63,12 @@
                 break;
             }
         }
-        if(isset($_GET['error']) == 'already_voted'){
+        else if(isset($_GET['error']) === 'already_voted'){
             echo '<script type="text/javascript">alert("Already voted.");</script>';
-        }
+
+        } else if( isset($_GET['error']) === 'stmtfailed'){
+            echo '<script type="text/javascript">alert("Fetching data failed.");</script>';
+
+        } 
     }
     ?>

@@ -9,7 +9,7 @@
 <body>
     <?php include 'includes/class-autoload.inc.php'?>
     <?php include 'includes/navbar.inc.php'?>
-    <?php require 'includes/register.inc.php'?>
+    <?php include 'includes/register.inc.php'?>
 
     <?php
 

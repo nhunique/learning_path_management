@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $path = $learningPath->updateSpecificLearningPath($pathID, $email, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks);
 
        // print_r($path);
-        header("Location: pathsManager.php?error=none");
+        header("Location: view.php?error=none");
         exit(); 
     }
 }

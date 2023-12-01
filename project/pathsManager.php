@@ -5,9 +5,36 @@
     $error = isset($_GET['error']) ? $_GET['error'] :null;
     checkErrorCode($error);
 
-    
-    
-    ?>
+
+
+    //Check error code
+    function checkErrorCode($errorCode){
+
+        // Check if the "error" parameter is present in the URL
+        if (isset($_GET['error'])) {
+            $errorCode = $_GET['error'];
+
+            // Display something based on the error code
+            switch ($errorCode) {
+                case 'none':
+                    echo '<script type="text/javascript">alert("Create/Update successfully.");</script>';
+                    break;
+                case 'invaliduser':
+                    echo "Invalid email error!";
+                    break;
+                case 'emptyinput':
+                    echo "Empty input error!";
+                    break;
+                default:
+                    echo "Unknown error!";
+                    break;
+            }
+        }
+
+    }
+?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,11 +49,7 @@
     <?php include 'includes/navbar.inc.php'?>
     <?php include 'includes/pathsManager.inc.php'?>
 
-    <!-- Path Manager System  -->
-    <div class="container mt-5 mb-5">
-        <h1 class="display-2">Path Manager System </h1>
-    </div>
-
+   
     <!-- Create Path Form-->
     <section id="pathManager" class="container">
         <div class="container" id="create">
@@ -110,37 +133,3 @@
 
     </script>
 </html>
-
-
-<?php
-
-    //Check error code
-    function checkErrorCode($errorCode){
-
-        // Check if the "error" parameter is present in the URL
-        if (isset($_GET['error'])) {
-            $errorCode = $_GET['error'];
-
-            // Display something based on the error code
-            switch ($errorCode) {
-                case 'none':
-                    echo '<script type="text/javascript">alert("Create/Update successfully.");</script>';
-                    break;
-                case 'invaliduser':
-                    echo "Invalid email error!";
-                   
-                    break;
-                case 'emptyinput':
-                    echo "Empty input error!";
-              
-                    break;
-                
-                default:
-                    echo "Unknown error!";
-                    break;
-            }
-        }
-
-    }
-?>
-

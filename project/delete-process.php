@@ -12,7 +12,7 @@
         $learningPath = new LearningPath();
         $learningPath->deleteSpecificLearningPath1($pathID);
 
-        header("Location: pathsManager.php?error=none");
+        header("Location: view.php?error=none");
     }
 
 ?>

@@ -18,7 +18,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         //Running error handler and create learning Path
         $learningPath->createLearningPath();
 
-        header("Location: ../project/pathsManager.php?error=none");
+        header("Location: pathsManager.php?error=none");
 
     }
 

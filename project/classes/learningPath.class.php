@@ -2,7 +2,31 @@
 
 class LearningPath extends Dbh{
 
-  
+    // Function to check if a user with a vote for a path exists
+    private function  checkPathIDExist($pathID) {
+        $sql = "SELECT pathID FROM learning_paths 
+                WHERE pathID = ?";
+        $stmt = $this->connect()->prepare($sql);
+
+        // Check if stmt execute
+        if (!$stmt->execute([$pathID])) {
+            // Close stmt
+            $stmt = null;
+            header("Location: index.php?error=stmtfailed");
+            exit();
+        }
+
+        $pathID = $stmt->fetchAll();
+
+        // Check if a user was found
+        if (!$pathID) {
+            return []; // No user found
+        }
+
+        return $pathID['pathID'];
+    }
+    
+    
     // Function to check if a user with a vote for a path exists
     private function  checkUserExistsInUserVote($userID) {
         $sql = "SELECT userID FROM user_vote 
@@ -38,7 +62,7 @@ class LearningPath extends Dbh{
         if (!$stmt->execute([$email])) {
             // Close stmt
             $stmt = null;
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: pathsManager.php?error=stmtfailed");
             exit();
         }
 
@@ -59,7 +83,7 @@ class LearningPath extends Dbh{
         $userIDExists = $this->checkUserExists($email);
 
         if (!$userIDExists) {
-            header("Location: ../project/pathsManager.php?error=invaliduser");
+            header("Location: pathsManager.php?error=invaliduser");
             exit();
         }
 
@@ -69,7 +93,7 @@ class LearningPath extends Dbh{
     
         if (!$stmt->execute([$title, $description, $userIDExists])) {
             $stmt = null;
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: pathsManager.php?error=stmtfailed");
             exit();
         }
     
@@ -89,7 +113,7 @@ class LearningPath extends Dbh{
                 // Handle the error
                 $stmt = null;
                 $stmtUrls = null;
-                header("Location: ../project/pathsManager.php?error=stmtfailed");
+                header("Location: pathsManager.php?error=stmtfailed");
                 exit();
             }
         }
@@ -100,24 +124,31 @@ class LearningPath extends Dbh{
     
 
     public function getSpecificPath($pathID){
-        // grab path and associated urls info from the database
+        // grab path info from the database
     
-        $sql = "SELECT DISTINCT title, description, userID, pathID  FROM learning_paths 
+        $sql = "SELECT  title, description, userID, pathID  FROM learning_paths 
                 WHERE pathID=?";
         $stmt = $this->connect()->prepare($sql);
-    
-    
-        // Execute the statement
+
         if (!$stmt->execute([$pathID])) {
-            // Close the statement
+            // Handle the error
             $stmt = null;
-            header("Location: update.php?error=stmtfailed");
+            header("Location: index.php?error=stmtfailed");
             exit();
         }
     
-        // Fetch all rows
-        $row = $stmt->fetchAll();
-        return $row;
+         // Fetch all rows
+        $rows = $stmt->fetchAll();
+
+        // Check if any rows were fetched
+        if (empty($rows)) {
+            // Handle the case where no rows are found
+            header("Location: index.php?error=stmtfailed");
+            exit();
+        } 
+
+        // Return row
+        return $rows;
     }
 
     
@@ -127,7 +158,7 @@ class LearningPath extends Dbh{
          $userIDExists = $this->checkUserExists($email);
 
          if (!$userIDExists) {
-             header("Location: ../project/pathsManager.php?error=invaliduser");
+             header("Location: pathsManager.php?error=invaliduser");
              exit();
          }
 
@@ -140,7 +171,7 @@ class LearningPath extends Dbh{
         if (!$stmt->execute([$userIDExists])) {
             // Close the statement
             $stmt = null;
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: pathsManager.php?error=stmtfailed");
             exit();
         }
     
@@ -165,14 +196,14 @@ class LearningPath extends Dbh{
         $stmt = $this->connect()->prepare($sql);
 
         if (!$stmt->execute([$pathID])) {
-            
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
-            exit();
+
+            header("Location: index.php?error=stmtfailed");
+           exit();
         }
 
         // Fetch all rows
         $urls = $stmt->fetchAll();
-
+    
         return $urls;
     } 
 
@@ -183,7 +214,7 @@ class LearningPath extends Dbh{
         $userIDExists = $this->checkUserExists($email);
     
         if (!$userIDExists) {
-            header("Location: pathsManager.php?error=invaliduser");
+            header("Location: view.php?error=invaliduser");
             exit();
         }
     
@@ -195,7 +226,7 @@ class LearningPath extends Dbh{
 
         // Check for prepare error
         if (!$stmt) {
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: view.php?error=stmtfailed");
             exit();
         }
 
@@ -205,7 +236,7 @@ class LearningPath extends Dbh{
         // Check for execute error
         if (!$result) {
             
-            header("Location: ../project/pathsManager.php?error=updatefailed");
+            header("Location: view.php?error=update_failed");
             exit();
         }
 
@@ -217,7 +248,7 @@ class LearningPath extends Dbh{
 
         // Check for prepare error
         if (!$stmtUrls) {
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: view.php?error=stmtfailed");
             exit();
         }
 
@@ -225,7 +256,7 @@ class LearningPath extends Dbh{
         $stmtSelect = $connection->prepare($selectSql);
         // Check for prepare error
         if (!$stmtSelect) {
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: view.php?error=stmtfailed");
             exit();
         }
         $stmtSelect->execute([$pathID]);
@@ -249,7 +280,7 @@ class LearningPath extends Dbh{
                 // Check for execute error
                 if (!$resultUrls) {
                     echo $stmtUrls->errorInfo(); // or log the error
-                    header("Location: ../project/pathsManager.php?error=urlupdatefailed");
+                    header("Location: view.php?error=urlupdatefailed");
                     exit();
                 }
                 $count++;
@@ -268,7 +299,7 @@ class LearningPath extends Dbh{
                 $stmtInsert = $this->connect()->prepare($insertSql);
         
                 if (!$stmtInsert) {
-                    header("Location: ../project/pathsManager.php?error=urlinsertfailed");
+                    header("Location: view.php?error=urlinsertfailed");
                     exit();
                 }
         
@@ -277,7 +308,7 @@ class LearningPath extends Dbh{
         
                 // Check for execute error
                 if (!$resultInsert) {
-                    header("Location: ../project/pathsManager.php?error=urlinsertfailed");
+                    header("Location: view.php?error=urlinsertfailed");
                     exit();
                 }
                
@@ -325,7 +356,7 @@ class LearningPath extends Dbh{
         if(!$stmt->execute([ $pathID]) || !$stmtUrls->execute([$pathID])){
             $stmt = null;
             $stmtUrls =null;
-            header("Location: ../project/pathsManager.php?error=stmtfailed");
+            header("Location: view.php?error=stmtfailed");
             exit();
         }
         $stmt = null;
@@ -360,15 +391,13 @@ class LearningPath extends Dbh{
             // Commit the transaction if everything is successful
             $connection->commit();
     
-            // Redirect or handle success
-            header("Location: pathsManager.php?success=delete_success");
-            exit();
+            
         } catch (Exception $e) {
             // An error occurred, rollback the transaction
             $connection->rollBack();
     
             // Handle the error appropriately
-            header("Location: pathsManager.php?error=delete_failed");
+            header("Location: view.php?error=delete_failed");
             exit();
         } finally {
             // Close statements
@@ -488,7 +517,7 @@ class LearningPath extends Dbh{
                 header("Location: index.php?vote=up");
                 exit();
             } else {
-                // Alert or handle already voted case
+                // Alert already voted case
                 header("Location: index.php?error=already_voted");
                 exit();
             }
@@ -499,7 +528,7 @@ class LearningPath extends Dbh{
                 header("Location: index.php?vote=down");
                 exit();
             } else {
-                // Alert or handle not voted yet case
+                
                 header("Location: index.php?error=not_voted_yet");
                 exit();
             }
@@ -507,12 +536,119 @@ class LearningPath extends Dbh{
     }
     
     //Handle Cloning Path
+    public function setClonePath($userID, $originalPathID) {
+        // Fetch original path data
+        $originalPathData = $this->getSpecificPath($originalPathID);
+    
+        if (!$originalPathData) {
+            echo "Original path not found.";
+            return;
+        }
+    
+        // Extract data from the original path
+        foreach ($originalPathData as $path) {
+            $title = $path['title'];
+            $description = $path['description'];
+            $userID = $path['userID'];
+        }
+    
+        // Fetch original urls
+        $orginalUrls = $this->getUrls($originalPathID);
+    
+        // Extract data from the original urls
+        foreach ($orginalUrls as $url) {
+            $urlTitles[] = $url['urlTitle'];
+            $urlLinks[] = $url['urlLink'];
+        }
+    
+        // Insert URLs associated with the cloned path
+        $this->insertUrls($originalPathID, $urlTitles, $urlLinks);
+    
+        // Insert the clone into clone_paths table
+        $clonePathID = $this->insertClonePath($title, $description, $originalPathID, $userID);
+    
+        
+        if ($clonePathID !== null) {
+            // Store the cloneID in a session variable
+            $_SESSION['cloneID'] = $clonePathID;
+       
+            echo "Clone path added successfully!";
+            header("Location: index.php?error=none");
+        } else {
+            // Handle the case where the clone path insertion fails
+            echo "Failed to add clone path.";
+            header("Location: index.php?error=clonefailed");
 
-    public function clonePath(){
-
-
-
+        }
     }
+    
+    private function insertUrls($originalPathID, $urlTitles, $urlLinks) {
+        $sql = "INSERT INTO urls (cloneID, pathID, urlTitle, urlLink) VALUES (?, ?, ?, ?)";
+        $stmt = $this->connect()->prepare($sql);
+    
+        foreach ($urlTitles as $key => $urlTitle) {
+            $urlLink = $urlLinks[$key];
+    
+            // Insert URLs associated with the cloned path
+            if (!$stmt->execute([null, $originalPathID, $urlTitle, $urlLink])) {
+                echo "Failed to insert URL: $urlTitle";
+                header("Location: index.php?error=stmtfailed");
+
+            }
+        }
+    }
+    
+    private function insertClonePath($title, $description, $originalPathID, $userID) {
+        $sql = "INSERT INTO clone_paths (cloneTitle, cloneDescription, originalPathID, userID) VALUES (?, ?, ?, ?)";
+        $stmt = $this->connect()->prepare($sql);
+    
+        if ($stmt->execute([$title, $description, $originalPathID, $userID])) {
+            // Return the last inserted ID (clonePathID)
+            return $this->connect()->lastInsertId();
+        } else {
+            // Handle the case where the clone path insertion fails
+            echo "Failed to insert clone path.";
+            return null;
+        }
+    }
+    
+    
+    
+    //Handle Sharing Path
+    
+    public function generateUniqueIdentifier($originalPathID)
+    {
+        // generate using md5
+        return md5($originalPathID);
+    }
+
+    // Function to retrieve path information by the unique identifier
+    public function getPathByUniqueIdentifier( $uniqueIdentifier)
+    {
+        try{
+            $stmt = $this->connect()->prepare("SELECT pathID FROM learning_paths WHERE uniqueIdentifier = ?");
+            
+            $stmt->execute([$uniqueIdentifier]);
+        } catch (PDOException $e){
+            echo "Error in " . $e->getFile() . " on line " . $e->getLine() . ": " . $e->getMessage();
+            exit();
+        }
+        return $stmt->fetchAll();
+    }
+
+    // Store the unique identifier in the database 
+    public function storeIdentifier($originalPathID,$uniqueIdentifier ){
+        try{
+            $stmt = $this->connect()->prepare("UPDATE learning_paths SET uniqueIdentifier = ? WHERE pathID = ?");
+          
+            $stmt->execute([$uniqueIdentifier,$originalPathID ]);
+        } catch (PDOException $e){
+            echo "Error in " . $e->getFile() . " on line " . $e->getLine() . ": " . $e->getMessage();
+            exit();
+        }
+    }
+
+
 
 
     public function displayLearningPaths(){
@@ -577,7 +713,7 @@ class LearningPath extends Dbh{
                 echo '<button type="submit" class="btn btn-info text-white mt-3" name="clone">CLONE</button>';
                 echo '</form>';
                
-                echo '<form action="clone-handler.php" method="post">';
+                echo '<form action="share-handler.php" method="post">';
                 echo '<input type="hidden" name="pathID" value="' . $pathID . '">';
                 echo '<button type="submit" class="btn btn-light text-info mt-3" name="share">Share</button>';
                 echo '</form>';
@@ -600,6 +736,79 @@ class LearningPath extends Dbh{
  
     }
 
+     //view specific path
+     public  function viewSpecificPath($pathID){
+      
+        $rows = $this->getSpecificPath($pathID);
+        //var_dump($rows);
+        foreach( $rows as $row){
+            $pathID = $row['pathID'];
+            $title = $row['title'];
+            $description = $row['description'];
+        }
+    
+        // HTML content for each card
+        echo '<div class="card p-5">';
+        echo '<h3 class="card-header">Title: ' . htmlspecialchars($title) . '</h3>'; 
+       
+        echo '<div class="card-body">' ;
+        echo '<h4 class="card-title">Description: ' . htmlspecialchars($description).'</h4>';
+       
+        echo '<p class="card-text">Links: </p>';
+        echo  '</div>';
+
+        // Display associated URLs
+        $urls = $this->getUrls($pathID); // fetch URLs for a specific pathID
+
+        echo '<ul class="list-group list-group-flush">';
+        foreach ($urls as $url) {
+            echo '<li class="list-group-item"><a href="' . htmlspecialchars($url['urlLink']) . '">' . htmlspecialchars($url['urlTitle']) . '</a></li>';
+        }
+        echo '</ul>';
+
+        
+    }
+
+    public function displayClonePathInfo($cloneID) {
+        $sql = "SELECT DISTINCT * FROM clone_paths WHERE cloneID = ?";
+        $stmt = $this->connect()->prepare($sql);
+    
+        if ($stmt->execute([$cloneID])) {
+            $clonePathInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if ($clonePathInfo) {
+                // Display clone path information
+                echo '<div class="card p-5">';
+                echo '<h3 class="card-header">' . htmlspecialchars($clonePathInfo['cloneTitle']) . '</h3>';
+                echo '<div class="card-body">';
+                echo '<h4 class="card-title">' . htmlspecialchars($clonePathInfo['cloneDescription']) . '</h4>';
+                echo '<p class="card-text">Original Path ID: ' . htmlspecialchars($clonePathInfo['originalPathID']) . '</p>';
+                echo '<p class="card-text">User ID: ' . htmlspecialchars($clonePathInfo['userID']) . '</p>';
+                echo '</div>';
+    
+                $clonePathID= $clonePathInfo['cloneID'];
+                // You may want to fetch and display associated URLs here
+                $urls = $this->getUrls($clonePathID);
+    
+                if ($urls) {
+                    echo '<ul class="list-group list-group-flush">';
+                    foreach ($urls as $url) {
+                        echo '<li class="list-group-item"><a href="' . htmlspecialchars($url['urlLink']) . '">' . htmlspecialchars($url['urlTitle']) . '</a></li>';
+                    }
+                    echo '</ul>';
+                } else {
+                    echo '<p class="card-text">No associated URLs.</p>';
+                }
+    
+                echo '</div>'; // Close the card
+            } else {
+                echo "Clone path not found.";
+            }
+        } else {
+            echo "Error fetching clone path information.";
+        }
+    }
+    
 
     
 }

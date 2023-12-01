@@ -1,7 +1,52 @@
 <?php 
     session_start(); 
     isset($_SESSION['email']) ? $_SESSION['email'] : " ";
+    $error = isset($_GET['error']) ? $_GET['error'] :null;
+    checkErrorCode($error);
 
+    //Check error code
+    function checkErrorCode($errorCode){
+        // Check if the "error" parameter is present in the URL
+        if (isset($_GET['error'])) {
+            $errorCode = $_GET['error'];
+
+            // Display something based on the error code
+            switch ($errorCode) {
+                case 'none':
+                    echo '<script type="text/javascript">alert("Create/Update/Delete successfully.");</script>';
+                    break;
+                case 'invaliduser':
+                    echo "Invalid email error!";
+                    break;
+                case 'delete_failed':
+                    echo '<script type="text/javascript">alert("Delete Failed. Try later.");</script>';
+                    break;
+                case 'update_failed':
+                    echo '<script type="text/javascript">alert("Update Failed. Try later.");</script>';
+                    break;
+                case 'urlsupdatefailed':
+                    echo '<script type="text/javascript">alert("Update Failed. Try later.");</script>';
+                    break;
+                case 'urlinsertfailed':
+                    echo '<script type="text/javascript">alert("Update/Delete Failed. Try later.");</script>';
+                    break;
+                case 'update_failed':
+                    echo '<script type="text/javascript">alert("Update/Delete Failed. Try later.");</script>';
+                    break;
+                case 'emptyinput':
+                    echo "Empty input error!";
+                    break;
+                case 'stmtfailed':
+                    echo '<script type="text/javascript">alert("Create/Update/Delete Failed. Try later.");</script>';
+                    break;
+                    
+                default:
+                    echo "Unknown error!";
+                    break;
+            }
+        }
+
+    }
 ?>
 
 <!DOCTYPE html>

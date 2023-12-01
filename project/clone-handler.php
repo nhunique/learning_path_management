@@ -1,17 +1,24 @@
-<?php include 'includes/class-autoload.inc.php'?>
-
-
 <?php
 session_start();
-
+include 'includes/class-autoload.inc.php';
+isset($_POST['pathID']) ? $_POST['pathID'] :"";
+isset($_SESSION['cloneID'] ) ? $_SESSION['cloneID']  : "";
+    
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Include your class or any necessary initialization
-    $learningPath = new LearningPath();
+    if( isset($_POST['clone'])) {
 
-    if (isset($_POST['clone'])) {
-        $learningPath->clonePath($learningPath, 'upvote');
-    } 
+        $originalPathID = $_POST['pathID'];
+        $userID = $_SESSION['userID'];
+
+        $learningPath = new LearningPath();
+        $learningPath->setClonePath( $userID,$originalPathID);
+        
+        $cloneID= $_SESSION['cloneID'] ;
+        echo $_SESSION['cloneID'] ;
+
+        header("Location: path_details.php?clone=$cloneID");
+        exit();
+    }
 }
 
 
-?>
