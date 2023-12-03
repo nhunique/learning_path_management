@@ -13,11 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $learningPath = new LearningPath();
         $learningPath->setClonePath( $userID,$originalPathID);
         
-        $cloneID= $_SESSION['cloneID'] ;
-        echo $_SESSION['cloneID'] ;
+        //$cloneID= $_SESSION['cloneID'] ;
+        //echo $_SESSION['cloneID'] ;
 
-        header("Location: path_details.php?clone=$cloneID");
-        exit();
+        //header("Location: path_details.php?clone=$cloneID");
+        //exit();
     }
 }
 

@@ -70,5 +70,13 @@
             echo '<script type="text/javascript">alert("Fetching data failed.");</script>';
 
         } 
+        else if(isset($_GET['delete']) == 'success'){
+            echo '<script type="text/javascript">alert("Delete Clone Path successfully!");</script>';
+            
+        } else if(isset($_GET['update']) == 'success'){
+            echo '<script type="text/javascript">alert("Update Clone Path successfully!");</script>';
+            
+        }
     }
     ?>
+<?php include 'includes/footer.inc.php';?>

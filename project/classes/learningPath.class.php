@@ -123,6 +123,34 @@ class LearningPath extends Dbh{
     }
     
 
+    public function getSpecificClonePath($cloneID){
+        // grab path info from the database
+    
+        $sql = "SELECT  title, description, userID, cloneID  FROM clone_paths 
+                WHERE pathID=?";
+        $stmt = $this->connect()->prepare($sql);
+
+        if (!$stmt->execute([$cloneID])) {
+            // Handle the error
+            $stmt = null;
+            header("Location: path_details.php?error=stmtfailed");
+            exit();
+        }
+    
+         // Fetch all rows
+        $rows = $stmt->fetchAll();
+
+        // Check if any rows were fetched
+        if (empty($rows)) {
+            // Handle the case where no rows are found
+            header("Location: path_details.php?error=stmtfailed");
+            exit();
+        } 
+
+        // Return row
+        return $rows;
+    }
+
     public function getSpecificPath($pathID){
         // grab path info from the database
     
@@ -206,7 +234,23 @@ class LearningPath extends Dbh{
     
         return $urls;
     } 
+    
+    //GET URLS fetch URLs for a specific cloneID
+    public function getUrlsByCloneID($clonePathID){
+        $sql = "SELECT urlID, urlTitle, urlLink FROM urls WHERE cloneID = ?";
+        $stmt = $this->connect()->prepare($sql);
 
+        if (!$stmt->execute([$clonePathID])) {
+
+            header("Location: index.php?error=stmtfailed");
+        exit();
+        }
+
+        // Fetch all rows
+        $urls = $stmt->fetchAll();
+
+        return $urls;
+    } 
     
     //UPDATE LEARNING PATH
     public function updateSpecificLearningPath($pathID, $email, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks) {
@@ -239,86 +283,112 @@ class LearningPath extends Dbh{
             header("Location: view.php?error=update_failed");
             exit();
         }
+    }
+            
+    //UPDATE ClONE LEARNING PATH
+    public function updateCloneLearningPath($cloneID, $userID, $updateTitle, $updateDescription, $updateUrlTitles, $updateUrlLinks){
+    
 
-       
+        $connection= $this->connect();
 
-        // Update existing urls 
-        $sqlUrls = "UPDATE urls SET urlTitle=?, urlLink=? WHERE urlID=?";
-        $stmtUrls = $connection->prepare($sqlUrls);
+        // Update learning_paths (parent) first
+        $sql = "UPDATE clone_paths SET cloneTitle=?, cloneDescription=?, userID=? WHERE cloneID=?";
+        $stmt = $connection->prepare($sql);
 
         // Check for prepare error
-        if (!$stmtUrls) {
-            header("Location: view.php?error=stmtfailed");
+        if (!$stmt) {
+            header("Location: path_details.php?error=stmtfailed");
             exit();
         }
 
-        $selectSql = "SELECT * FROM urls WHERE pathID = ?";
-        $stmtSelect = $connection->prepare($selectSql);
-        // Check for prepare error
-        if (!$stmtSelect) {
-            header("Location: view.php?error=stmtfailed");
+        // Execute the update
+        $result = $stmt->execute([$updateTitle, $updateDescription, $userID, $cloneID]);
+
+        // Check for execute error
+        if (!$result) {
+            
+            header("Location: path_details.php?error=update_failed");
             exit();
         }
-        $stmtSelect->execute([$pathID]);
-        $urls = $stmtSelect->fetchAll();
+        
 
-        
-        $numOfUpdate = count($updateUrlTitles);
-        $numOfOrigin = count($urls);
-        $count = 0;
+            // Update existing urls 
+            $sqlUrls = "UPDATE urls SET urlTitle=?, urlLink=? WHERE urlID=?";
+            $stmtUrls = $connection->prepare($sqlUrls);
 
-        if ($count < $numOfOrigin && $count <$numOfUpdate){
-            foreach ($urls as $i =>  $url) {
-                //update existing urls
-                $urlID = $url['urlID'];
-                $updateUrlTitle = $updateUrlTitles[$i];
-                $updateUrlLink = $updateUrlLinks[$i];
-        
-                // Execute the update
-                $resultUrls = $stmtUrls->execute([$updateUrlTitle, $updateUrlLink, $urlID]);
-        
-                // Check for execute error
-                if (!$resultUrls) {
-                    echo $stmtUrls->errorInfo(); // or log the error
-                    header("Location: view.php?error=urlupdatefailed");
-                    exit();
-                }
-                $count++;
+            // Check for prepare error
+            if (!$stmtUrls) {
+                header("Location: path_details.php?error=stmtfailed");
+                exit();
             }
-         
 
-        }  elseif ($count >= $numOfOrigin && $count <= $numOfUpdate)  {
-            for( $j = $count ; $j <= $numOfUpdate; $j++){
-
-                // This URL is beyond the existing ones, so add it as a new URL
-                $newUrlTitle = $updateUrlTitles[$j];
-                $newUrlLink = $updateUrlLinks[$j];
-        
-                // Insert the new URL into the database
-                $insertSql = "INSERT INTO urls (pathID, urlTitle, urlLink) VALUES (?, ?, ?)";
-                $stmtInsert = $this->connect()->prepare($insertSql);
-        
-                if (!$stmtInsert) {
-                    header("Location: view.php?error=urlinsertfailed");
-                    exit();
-                }
-        
-                // Execute the insert
-                $resultInsert = $stmtInsert->execute([$pathID, $newUrlTitle, $newUrlLink]);
-        
-                // Check for execute error
-                if (!$resultInsert) {
-                    header("Location: view.php?error=urlinsertfailed");
-                    exit();
-                }
-               
+            $selectSql = "SELECT * FROM urls WHERE cloneID = ?";
+            $stmtSelect = $connection->prepare($selectSql);
+            // Check for prepare error
+            if (!$stmtSelect) {
+                header("Location: path_details.php?error=stmtfailed");
+                exit();
             }
-        }
+            $stmtSelect->execute([$cloneID]);
+            $urls = $stmtSelect->fetchAll();
+            //var_dump( $urls);
+            
+            $numOfUpdate = count($updateUrlTitles);
+            $numOfOrigin = count($urls);
+            $count = 0;
+
+            if ($count < $numOfOrigin && $count <$numOfUpdate){
+                foreach ($urls as $i =>  $url) {
+                    //update existing urls
+                    $urlID = $url['urlID'];
+                    $updateUrlTitle = $updateUrlTitles[$i];
+                    $updateUrlLink = $updateUrlLinks[$i];
+            
+                    // Execute the update
+                    $resultUrls = $stmtUrls->execute([$updateUrlTitle, $updateUrlLink, $urlID]);
+            
+                    // Check for execute error
+                    if (!$resultUrls) {
+                        echo $stmtUrls->errorInfo(); // or log the error
+                        header("Location: path_details.php?error=urlupdatefailed");
+                        exit();
+                    }
+                    $count++;
+                }
+            
+
+            }  elseif ($count >= $numOfOrigin && $count <= $numOfUpdate)  {
+                for( $j = $count ; $j <= $numOfUpdate; $j++){
+
+                    // This URL is beyond the existing ones, so add it as a new URL
+                    $newUrlTitle = $updateUrlTitles[$j];
+                    $newUrlLink = $updateUrlLinks[$j];
+            
+                    // Insert the new URL into the database
+                    $insertSql = "INSERT INTO urls (cloneID, urlTitle, urlLink) VALUES (?, ?, ?)";
+                    $stmtInsert = $this->connect()->prepare($insertSql);
+            
+                    if (!$stmtInsert) {
+                        header("Location: path_details.php?error=urlinsertfailed");
+                        exit();
+                    }
+            
+                    // Execute the insert
+                    $resultInsert = $stmtInsert->execute([$cloneID, $newUrlTitle, $newUrlLink]);
+            
+                    // Check for execute error
+                    if (!$resultInsert) {
+                        header("Location: path_details.php?error=urlinsertfailed");
+                        exit();
+                    }
+                
+                }
+            }
 
         //debug
-        $testsql = "SELECT * from learning_paths JOIN urls ON learning_paths.pathID = urls.pathID WHERE learning_paths.pathID =?";
+        $testsql = "SELECT * from clone_paths JOIN urls ON clone_paths.cloneID = urls.cloneID WHERE clone_paths.cloneID =?";
         $stmtTest = $connection->prepare($testsql);
-        $stmtTest->execute([$pathID]);
+        $stmtTest->execute([$cloneID]);
         $test = $stmtTest->fetchAll();
         
         $stmtTest =null;
@@ -329,7 +399,7 @@ class LearningPath extends Dbh{
         $stmtUrls = null;
 
 
-        print 'count:'. $count. '<br>'; print 'orgin:'.$numOfOrigin.'<br>'; print'update:'. $numOfUpdate . '<br>';
+       // print 'count:'. $count. '<br>'; print 'orgin:'.$numOfOrigin.'<br>'; print'update:'. $numOfUpdate . '<br>';
          //Redirect if everything was successful
         //header("Location: pathsManager.php?error=none");
        // header("Location: view.php");
@@ -337,32 +407,55 @@ class LearningPath extends Dbh{
         return $test;
     }
     
+    //delete CLONEpath's info
+
+
+    public function deleteSpecificClonePath1($cloneID) {
+        // Delete child record urls
+        $connection = $this->connect();
+        $sqlUrls = "DELETE FROM urls WHERE cloneID = ?";
+        $stmtUrls = $connection->prepare($sqlUrls);
+    
+        // Delete learning path record
+        $sql = "DELETE FROM clone_paths WHERE cloneID = ?";
+        $stmt = $connection->prepare($sql);
+    
+        try {
+            // Begin a transaction
+            $connection->beginTransaction();
+    
+            // Delete URLs
+            if (!$stmtUrls->execute([$cloneID])) {
+                throw new Exception("Error deleting URLs");
+            }
+    
+            // Delete learning path
+            if (!$stmt->execute([$cloneID])) {
+                throw new Exception("Error deleting learning path");
+            }
+    
+            // Commit the transaction if everything is successful
+            $connection->commit();
+    
+            
+        } catch (Exception $e) {
+            // An error occurred, rollback the transaction
+            $connection->rollBack();
+    
+            // Handle the error appropriately
+            header("Location: path_details.php?error=delete_failed");
+            exit();
+        } finally {
+            // Close statements
+            $stmt = null;
+            $stmtUrls = null;
+        }
+    }
+
 
     
     //delete learningpath's info
 
-    public function deleteSpecificLearningPath( $pathID){
-        
-        // Delete child record url
-        $sqlUrls = "DELETE FROM urls WHERE pathID = ?";
-        $stmtUrls = $this->connect()->prepare($sqlUrls);
-
-        //Delete learningpath record
-        $sql = "DELETE FROM learning_paths WHERE pathID =?";
-        $stmt =$this->connect()->prepare($sql);
-
-
-
-        if(!$stmt->execute([ $pathID]) || !$stmtUrls->execute([$pathID])){
-            $stmt = null;
-            $stmtUrls =null;
-            header("Location: view.php?error=stmtfailed");
-            exit();
-        }
-        $stmt = null;
-       
-
-    }
 
     public function deleteSpecificLearningPath1($pathID) {
         // Delete child record urls
@@ -540,40 +633,46 @@ class LearningPath extends Dbh{
         // Fetch original path data
         $originalPathData = $this->getSpecificPath($originalPathID);
     
+        //var_dump( $originalPathData);
         if (!$originalPathData) {
             echo "Original path not found.";
-            return;
+            header("Location: index.php?error=pathnotfound");
         }
     
         // Extract data from the original path
-        foreach ($originalPathData as $path) {
+        foreach ($originalPathData as $key=> $path) {
             $title = $path['title'];
             $description = $path['description'];
             $userID = $path['userID'];
         }
     
         // Fetch original urls
-        $orginalUrls = $this->getUrls($originalPathID);
-    
+        $originalUrls = $this->getUrls($originalPathID);
+        //var_dump( $originalUrls);
+       
         // Extract data from the original urls
-        foreach ($orginalUrls as $url) {
+        if(!$originalUrls){
+            echo "Original Urls not found.";
+            header("Location: index.php?error=urlsnotfound");
+        }
+        foreach ($originalUrls as $key => $url) {
             $urlTitles[] = $url['urlTitle'];
             $urlLinks[] = $url['urlLink'];
         }
-    
+        
         // Insert URLs associated with the cloned path
-        $this->insertUrls($originalPathID, $urlTitles, $urlLinks);
+        $this->insertCloneUrls( $urlTitles, $urlLinks);
     
         // Insert the clone into clone_paths table
         $clonePathID = $this->insertClonePath($title, $description, $originalPathID, $userID);
-    
+       // echo $clonePathID;
         
         if ($clonePathID !== null) {
             // Store the cloneID in a session variable
             $_SESSION['cloneID'] = $clonePathID;
        
             echo "Clone path added successfully!";
-            header("Location: index.php?error=none");
+            header("Location: path_details.php?clone=$clonePathID");
         } else {
             // Handle the case where the clone path insertion fails
             echo "Failed to add clone path.";
@@ -582,29 +681,30 @@ class LearningPath extends Dbh{
         }
     }
     
-    private function insertUrls($originalPathID, $urlTitles, $urlLinks) {
-        $sql = "INSERT INTO urls (cloneID, pathID, urlTitle, urlLink) VALUES (?, ?, ?, ?)";
+    private function insertCloneUrls($urlTitles, $urlLinks) {
+        $sql = "INSERT INTO urls ( urlTitle, urlLink) VALUES ( ?, ?)";
         $stmt = $this->connect()->prepare($sql);
     
         foreach ($urlTitles as $key => $urlTitle) {
             $urlLink = $urlLinks[$key];
     
             // Insert URLs associated with the cloned path
-            if (!$stmt->execute([null, $originalPathID, $urlTitle, $urlLink])) {
+            if (!$stmt->execute([ $urlTitle, $urlLink])) {
                 echo "Failed to insert URL: $urlTitle";
-                header("Location: index.php?error=stmtfailed");
+                //header("Location: index.php?error=stmtfailed");
 
             }
         }
     }
-    
+
     private function insertClonePath($title, $description, $originalPathID, $userID) {
         $sql = "INSERT INTO clone_paths (cloneTitle, cloneDescription, originalPathID, userID) VALUES (?, ?, ?, ?)";
-        $stmt = $this->connect()->prepare($sql);
-    
+        $connection = $this->connect();
+        $stmt = $connection->prepare($sql);
+        
         if ($stmt->execute([$title, $description, $originalPathID, $userID])) {
             // Return the last inserted ID (clonePathID)
-            return $this->connect()->lastInsertId();
+            return $connection->lastInsertId();
         } else {
             // Handle the case where the clone path insertion fails
             echo "Failed to insert clone path.";
@@ -768,7 +868,6 @@ class LearningPath extends Dbh{
 
         
     }
-
     public function displayClonePathInfo($cloneID) {
         $sql = "SELECT DISTINCT * FROM clone_paths WHERE cloneID = ?";
         $stmt = $this->connect()->prepare($sql);
@@ -782,13 +881,12 @@ class LearningPath extends Dbh{
                 echo '<h3 class="card-header">' . htmlspecialchars($clonePathInfo['cloneTitle']) . '</h3>';
                 echo '<div class="card-body">';
                 echo '<h4 class="card-title">' . htmlspecialchars($clonePathInfo['cloneDescription']) . '</h4>';
-                echo '<p class="card-text">Original Path ID: ' . htmlspecialchars($clonePathInfo['originalPathID']) . '</p>';
                 echo '<p class="card-text">User ID: ' . htmlspecialchars($clonePathInfo['userID']) . '</p>';
                 echo '</div>';
     
-                $clonePathID= $clonePathInfo['cloneID'];
+                $clonePathID = $clonePathInfo['cloneID'];
                 // You may want to fetch and display associated URLs here
-                $urls = $this->getUrls($clonePathID);
+                $urls = $this->getUrlsByCloneID($clonePathID);
     
                 if ($urls) {
                     echo '<ul class="list-group list-group-flush">';
@@ -799,6 +897,26 @@ class LearningPath extends Dbh{
                 } else {
                     echo '<p class="card-text">No associated URLs.</p>';
                 }
+    
+                echo '<div class="container-fluid">';
+                // Display update and delete buttons
+                echo '<div class="row">';
+                echo '<div class="col-sm-6">';
+                echo '<form action="update-clone-handler.php" method="post">';
+                echo '<input type="hidden" name="cloneID" value="' . $clonePathID . '">';
+                echo '<button type="submit" class="btn btn-warning mt-3" name="update">Update</button>';
+                echo '</form>';
+                echo '</div>';
+    
+                echo '<div class="col-sm-6">';
+                echo '<form action="update-clone-handler.php" method="post">';
+                echo '<input type="hidden" name="cloneID" value="' . $clonePathID . '">';
+                echo '<button type="submit" class="btn btn-danger mt-3" name="delete">Delete</button>';
+                echo '</form>';
+                echo '</div>';
+                echo '</div>';
+    
+                echo '</div>'; // Close the container
     
                 echo '</div>'; // Close the card
             } else {
