@@ -133,3 +133,4 @@
 
     </script>
 </html>
+<?php include 'includes/footer.inc.php';?>

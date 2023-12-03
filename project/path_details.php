@@ -54,3 +54,4 @@ include 'includes/navbar.inc.php';
 </html>
 
 
+<?php include 'includes/footer.inc.php';?>
